@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Store Billing App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2196F3, #1976D2);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e0e0e0;
+        }
+
+        .card h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 16px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #555;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #2196F3;
+            box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+        }
+
+        .btn {
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            background: #1976D2;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-danger {
+            background: #f44336;
+        }
+
+        .btn-danger:hover {
+            background: #d32f2f;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: #f44336;
+            border: 2px solid #f44336;
+        }
+
+        .btn-outline:hover {
+            background: #f44336;
+            color: white;
+        }
+
+        .product-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .product-item:last-child {
+            border-bottom: none;
+        }
+
+        .product-info h3 {
+            color: #333;
+            margin-bottom: 4px;
+            font-size: 1.1rem;
+        }
+
+        .product-details {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding: 8px 0;
+        }
+
+        .summary-row.total {
+            border-top: 2px solid #e0e0e0;
+            margin-top: 16px;
+            padding-top: 16px;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .summary-row.total .value {
+            color: #2196F3;
+            font-weight: 700;
+            font-size: 1.3rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+        }
+
+        .empty-state h3 {
+            margin-bottom: 8px;
+            color: #999;
+        }
+
+        .header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .invoice-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .invoice-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .invoice-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .invoice-title {
+            color: #2196F3;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .invoice-date {
+            color: #666;
+            font-size: 1rem;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .close-btn:hover {
+            color: #333;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .product-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Store Billing App</h1>
+            <p>Manage products and generate invoices</p>
+        </div>
+
+        <div class="card">
+            <h2>Add Product</h2>
+            <form id="productForm">
+                <div class="form-group">
+                    <label for="productName">Product Name</label>
+                    <input type="text" id="productName" placeholder="Enter product name" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="productPrice">Price ($)</label>
+                        <input type="number" id="productPrice" step="0.01" min="0" placeholder="0.00" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="productQuantity">Quantity</label>
+                        <input type="number" id="productQuantity" min="1" value="1" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn">Add Product</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <div class="header-row">
+                <h2>Products (<span id="productCount">0</span>)</h2>
+                <button id="clearAllBtn" class="btn btn-outline" style="display: none;">Clear All</button>
+            </div>
+            <div id="productList">
+                <div class="empty-state">
+                    <h3>No products added yet</h3>
+                    <p>Add products using the form above</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Invoice Summary</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="taxRate">Tax Rate (%)</label>
+                    <input type="number" id="taxRate" step="0.1" min="0" value="10">
+                </div>
+                <div class="form-group">
+                    <label for="discount">Discount (%)</label>
+                    <input type="number" id="discount" step="0.1" min="0" value="0">
+                </div>
+            </div>
+            
+            <div class="summary-row">
+                <span>Subtotal:</span>
+                <span id="subtotal">$0.00</span>
+            </div>
+            <div class="summary-row">
+                <span>Tax (<span id="taxRateDisplay">10</span>%):</span>
+                <span id="taxAmount">$0.00</span>
+            </div>
+            <div class="summary-row">
+                <span>Discount (<span id="discountDisplay">0</span>%):</span>
+                <span id="discountAmount" style="color: #4CAF50;">-$0.00</span>
+            </div>
+            <div class="summary-row total">
+                <span>TOTAL:</span>
+                <span class="value" id="total">$0.00</span>
+            </div>
+            
+            <button id="generateInvoiceBtn" class="btn" disabled>Generate Invoice</button>
+        </div>
+    </div>
+
+    <!-- Invoice Modal -->
+    <div id="invoiceModal" class="invoice-modal">
+        <div class="invoice-content">
+            <button class="close-btn" onclick="closeInvoice()">&times;</button>
+            <div class="invoice-header">
+                <h1 class="invoice-title">INVOICE</h1>
+                <p class="invoice-date" id="invoiceDate"></p>
+                <p>Invoice #: <span id="invoiceNumber"></span></p>
+            </div>
+            <div id="invoiceProducts"></div>
+            <div id="invoiceSummary"></div>
+            <div style="margin-top: 30px; text-align: center;">
+                <button class="btn" onclick="printInvoice()">Print Invoice</button>
+                <button class="btn btn-outline" onclick="closeInvoice()" style="margin-left: 10px;">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let products = [];
+        let taxRate = 10;
+        let discount = 0;
+
+        // Load saved data
+        function loadData() {
+            const saved = localStorage.getItem('billingAppData');
+            if (saved) {
+                const data = JSON.parse(saved);
+                products = data.products || [];
+                taxRate = data.taxRate || 10;
+                discount = data.discount || 0;
+                updateUI();
+            }
+        }
+
+        // Save data
+        function saveData() {
+            localStorage.setItem('billingAppData', JSON.stringify({
+                products,
+                taxRate,
+                discount
+            }));
+        }
+
+        // Add product
+        document.getElementById('productForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('productName').value.trim();
+            const price = parseFloat(document.getElementById('productPrice').value);
+            const quantity = parseInt(document.getElementById('productQuantity').value);
+
+            if (!name) {
+                alert('Please enter a product name');
+                return;
+            }
+
+            if (isNaN(price) || price <= 0) {
+                alert('Please enter a valid price');
+                return;
+            }
+
+            if (isNaN(quantity) || quantity <= 0) {
+                alert('Please enter a valid quantity');
+                return;
+            }
+
+            const product = {
+                id: Date.now().toString(),
+                name,
+                price,
+                quantity
+            };
+
+            products.push(product);
+            updateUI();
+            saveData();
+            
+            // Reset form
+            document.getElementById('productForm').reset();
+            document.getElementById('productQuantity').value = '1';
+        });
+
+        // Remove product
+        function removeProduct(id) {
+            if (confirm('Are you sure you want to remove this product?')) {
+                products = products.filter(p => p.id !== id);
+                updateUI();
+                saveData();
+            }
+        }
+
+        // Clear all products
+        document.getElementById('clearAllBtn').addEventListener('click', function() {
+            if (confirm('Are you sure you want to remove all products?')) {
+                products = [];
+                updateUI();
+                saveData();
+            }
+        });
+
+        // Update tax rate and discount
+        document.getElementById('taxRate').addEventListener('input', function() {
+            taxRate = parseFloat(this.value) || 0;
+            updateUI();
+            saveData();
+        });
+
+        document.getElementById('discount').addEventListener('input', function() {
+            discount = parseFloat(this.value) || 0;
+            updateUI();
+            saveData();
+        });
+
+        // Generate invoice
+        document.getElementById('generateInvoiceBtn').addEventListener('click', function() {
+            if (products.length === 0) {
+                alert('Please add at least one product before generating an invoice.');
+                return;
+            }
+            showInvoice();
+        });
+
+        // Update UI
+        function updateUI() {
+            // Update product count
+            document.getElementById('productCount').textContent = products.length;
+            
+            // Show/hide clear all button
+            document.getElementById('clearAllBtn').style.display = products.length > 0 ? 'block' : 'none';
+            
+            // Update product list
+            const productList = document.getElementById('productList');
+            if (products.length === 0) {
+                productList.innerHTML = `
+                    <div class="empty-state">
+                        <h3>No products added yet</h3>
+                        <p>Add products using the form above</p>
+                    </div>
+                `;
+            } else {
+                productList.innerHTML = products.map(product => `
+                    <div class="product-item">
+                        <div class="product-info">
+                            <h3>${product.name}</h3>
+                            <p class="product-details">
+                                $${product.price.toFixed(2)} × ${product.quantity} = $${(product.price * product.quantity).toFixed(2)}
+                            </p>
+                        </div>
+                        <button class="btn btn-danger" onclick="removeProduct('${product.id}')">Remove</button>
+                    </div>
+                `).join('');
+            }
+
+            // Calculate totals
+            const subtotal = products.reduce((sum, product) => sum + (product.price * product.quantity), 0);
+            const taxAmount = (subtotal * taxRate) / 100;
+            const discountAmount = (subtotal * discount) / 100;
+            const total = subtotal + taxAmount - discountAmount;
+
+            // Update summary
+            document.getElementById('subtotal').textContent = `$${subtotal.toFixed(2)}`;
+            document.getElementById('taxAmount').textContent = `$${taxAmount.toFixed(2)}`;
+            document.getElementById('discountAmount').textContent = `-$${discountAmount.toFixed(2)}`;
+            document.getElementById('total').textContent = `$${total.toFixed(2)}`;
+            document.getElementById('taxRateDisplay').textContent = taxRate;
+            document.getElementById('discountDisplay').textContent = discount;
+
+            // Enable/disable generate button
+            document.getElementById('generateInvoiceBtn').disabled = products.length === 0;
+        }
+
+        // Show invoice modal
+        function showInvoice() {
+            const subtotal = products.reduce((sum, product) => sum + (product.price * product.quantity), 0);
+            const taxAmount = (subtotal * taxRate) / 100;
+            const discountAmount = (subtotal * discount) / 100;
+            const total = subtotal + taxAmount - discountAmount;
+
+            // Update invoice date and number
+            document.getElementById('invoiceDate').textContent = new Date().toLocaleDateString();
+            document.getElementById('invoiceNumber').textContent = Date.now().toString().slice(-8);
+
+            // Update invoice products
+            document.getElementById('invoiceProducts').innerHTML = `
+                <h3 style="margin-bottom: 15px;">Products:</h3>
+                ${products.map((product, index) => `
+                    <div style="margin-bottom: 10px; padding: 10px; background: #f9f9f9; border-radius: 6px;">
+                        <strong>${index + 1}. ${product.name}</strong><br>
+                        <span style="color: #666;">
+                            $${product.price.toFixed(2)} × ${product.quantity} = $${(product.price * product.quantity).toFixed(2)}
+                        </span>
+                    </div>
+                `).join('')}
+            `;
+
+            // Update invoice summary
+            document.getElementById('invoiceSummary').innerHTML = `
+                <div style="margin-top: 20px; padding-top: 20px; border-top: 2px solid #e0e0e0;">
+                    <div class="summary-row">
+                        <span>Subtotal:</span>
+                        <span>$${subtotal.toFixed(2)}</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Tax (${taxRate}%):</span>
+                        <span>$${taxAmount.toFixed(2)}</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Discount (${discount}%):</span>
+                        <span style="color: #4CAF50;">-$${discountAmount.toFixed(2)}</span>
+                    </div>
+                    <div class="summary-row total">
+                        <span>TOTAL:</span>
+                        <span class="value">$${total.toFixed(2)}</span>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('invoiceModal').style.display = 'block';
+        }
+
+        // Close invoice modal
+        function closeInvoice() {
+            document.getElementById('invoiceModal').style.display = 'none';
+        }
+
+        // Print invoice
+        function printInvoice() {
+            const invoiceContent = document.querySelector('.invoice-content').innerHTML;
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                    <head>
+                        <title>Invoice</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; margin: 20px; }
+                            .invoice-title { color: #2196F3; text-align: center; font-size: 2rem; margin-bottom: 20px; }
+                            .summary-row { display: flex; justify-content: space-between; margin-bottom: 8px; }
+                            .summary-row.total { border-top: 2px solid #e0e0e0; padding-top: 10px; font-weight: bold; }
+                            .value { color: #2196F3; font-weight: bold; }
+                        </style>
+                    </head>
+                    <body>
+                        ${invoiceContent}
+                    </body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.print();
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('invoiceModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeInvoice();
+            }
+        });
+
+        // Initialize app
+        loadData();
+    </script>
+</body>
+</html>
